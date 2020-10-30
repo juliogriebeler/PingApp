@@ -1,14 +1,14 @@
 package br.com.juliogriebeler.pingapp.enumeration;
 
-import br.com.juliogriebeler.pingapp.service.PingIcmpService;
-import br.com.juliogriebeler.pingapp.service.PingTcpIpService;
-import br.com.juliogriebeler.pingapp.service.TraceRouteService;
+import br.com.juliogriebeler.pingapp.runner.PingIcmpRunner;
+import br.com.juliogriebeler.pingapp.runner.PingTcpIpRunner;
+import br.com.juliogriebeler.pingapp.runner.TraceRouteRunner;
 
 public enum ExecutionType {
 
-    PING_TCPIP("pingtcpip", PingTcpIpService.class),
-    PING_ICMP("pingicmp", PingIcmpService.class),
-    TRACE_ROUTE("tracert", TraceRouteService.class);
+    PING_TCPIP("pingtcpip", PingTcpIpRunner.class),
+    PING_ICMP("pingicmp", PingIcmpRunner.class),
+    TRACE_ROUTE("tracert", TraceRouteRunner.class);
 
     private final String key;
     private final Class service;

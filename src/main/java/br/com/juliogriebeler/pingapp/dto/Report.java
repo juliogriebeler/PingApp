@@ -1,6 +1,8 @@
 package br.com.juliogriebeler.pingapp.dto;
 
-public class Report {
+import java.io.Serializable;
+
+public class Report implements Serializable {
 
     private String host;
     private String icmpPing;
@@ -14,19 +16,8 @@ public class Report {
         this.trace = trace;
     }
 
-    public String getHost() {
-        return host;
-    }
-
-    public String getIcmpPing() {
-        return icmpPing;
-    }
-
-    public String getTcpPing() {
-        return tcpPing;
-    }
-
-    public String getTrace() {
-        return trace;
+    @Override
+    public String toString() {
+        return String.format("{\"host\":%s, \"icmpPing\":%s, \"tcpPing\":%s, \"trace\":%s}", host, icmpPing, tcpPing, trace);
     }
 }

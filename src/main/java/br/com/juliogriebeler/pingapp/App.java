@@ -1,45 +1,58 @@
 package br.com.juliogriebeler.pingapp;
 
-import br.com.juliogriebeler.pingapp.database.dao.GenericDao;
-import br.com.juliogriebeler.pingapp.service.HostService;
+import br.com.juliogriebeler.pingapp.entity.RunningHistory;
+import br.com.juliogriebeler.pingapp.service.HostProcessorService;
+import br.com.juliogriebeler.pingapp.util.AppConstants;
+import br.com.juliogriebeler.pingapp.util.DatabaseUtil;
+import br.com.juliogriebeler.pingapp.util.HostUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class App {
 
     private static final Logger LOGGER = LogManager.getLogger(App.class);
 
+    /*
+    Method to start the application, initializing database if it doesn't exist,
+    and call the method to validate and process the input array
+     */
     public static void main(String[] args) {
         LOGGER.info(">> Starting execution of SimplePingApp");
-        initDatabase();
-        HostService hostService = new HostService();
-        if (null != args && args.length == 1) {
-            hostService.processInput(args[0]);
-        } else {
+        List<Class> classList = List.of(RunningHistory.class);
+        DatabaseUtil.initDatabase(classList);
+        validateAndProcessInput(args);
+    }
+
+    /*
+    Method to validate the input array and if valid, call the methos to process it.
+    If not valid, log message and finish the execution
+     */
+    protected static void validateAndProcessInput(String[] args) {
+        if (null != args && args.length == 1)
+            processInput(args[0]);
+        else {
             LOGGER.info("Arguments are wrong. Try again!");
             System.exit(1);
         }
     }
 
-    private static void initDatabase() {
-        LOGGER.debug(">> initDatabase");
-        try {
-            GenericDao genericDao = new GenericDao();
-            List<String> columnsList = new ArrayList<>();
-            columnsList.add("ID INTEGER PRIMARY KEY AUTOINCREMENT");
-            columnsList.add("HOST TEXT NOT NULL");
-            columnsList.add("EXECUTION_TYPE TEXT NOT NULL");
-            columnsList.add("EXECUTION_RESULT TEXT NOT NULL");
-            columnsList.add("START_TIME TEXT NOT NULL");
-            columnsList.add("END_TIME TEXT NOT NULL");
-            genericDao.createDbTable("HISTORY", columnsList);
-            LOGGER.debug("Database initialized succesfully");
-        } catch (Exception e) {
-            LOGGER.error("Error initialing database: {}", e.getMessage());
-        }
-        LOGGER.debug("<< initDatabase");
+    /*
+     * Method to parse/split input hosts and process every valid host as a thread in paralell
+     */
+    protected static void processInput(String input) {
+        HostProcessorService hostProcessorService = new HostProcessorService();
+        Stream.of(input.split(AppConstants.SEPARATOR))
+                .parallel()
+                .forEach(host -> {
+                    try {
+                        hostProcessorService.processHost(HostUtil.getInetAddressFromHost(host.trim()));
+                    } catch (Exception e) {
+                        LOGGER.error("Error with host {}: {}", host, e.getLocalizedMessage());
+                    }
+                });
     }
+
 }

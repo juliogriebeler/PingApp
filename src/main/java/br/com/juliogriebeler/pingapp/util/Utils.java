@@ -1,11 +1,14 @@
 package br.com.juliogriebeler.pingapp.util;
 
-import br.com.juliogriebeler.pingapp.enumeration.Constants;
 import br.com.juliogriebeler.pingapp.enumeration.ExecutionType;
 import br.com.juliogriebeler.pingapp.exception.PropertyNotFoundException;
-import br.com.juliogriebeler.pingapp.properties.Properties;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Utils {
 
@@ -19,15 +22,37 @@ public class Utils {
 
     /*
     This method add the OS to the key variable which gets the property from resources file.
-    As described on the requeiurement, it only validates if the OS is Windows. If not, it consider Linux
+    As described on the requeiurement, it validates if the OS is Windows. If not, it consider Linux
     */
-    public static String getCommandWithExecutionTypeAndOS(ExecutionType executionType) throws PropertyNotFoundException, IOException {
+    public static String getCommandWithExecutionTypeAndOS(ExecutionType executionType) throws IOException {
         try {
-            String key = String.format("%s.%s.%s", executionType.getKey(), Constants.COMMAND, Utils.isWindows() ? Constants.WINDOWS : Constants.LINUX);
-            String command = Properties.getInstance().getValue(key);
-            return command;
+            String key = String.format("%s.%s.%s", executionType.getKey(), AppConstants.COMMAND, Utils.isWindows() ? AppConstants.WINDOWS : AppConstants.LINUX);
+            return AppProperties.getInstance().getValue(key);
         } catch (Exception e) {
             throw new IOException(e.getMessage());
         }
     }
+
+    public static int getTimeSlotByExecutionType(ExecutionType executionType, String timeType) throws PropertyNotFoundException, IOException {
+        String key = String.format("%s.%s", executionType.getKey(), timeType);
+        return Integer.parseInt(AppProperties.getInstance().getValue(key));
+    }
+
+    public static Set<String> parseInputStreamToList(InputStreamReader inputStreamReader) throws IOException {
+        Set<String> commandExecutionResult = new LinkedHashSet<>();
+        BufferedReader reader = new BufferedReader(inputStreamReader);
+        String line;
+        while ((line = reader.readLine()) != null) {
+            commandExecutionResult.add(String.format("%s\n", line.trim().toLowerCase()));
+        }
+        return commandExecutionResult;
+    }
+
+    public static boolean isErrorWordPresent(Set<String> executionResponse, List<String> rules) {
+        return executionResponse.stream()
+                .anyMatch(responseLine -> rules.stream()
+                        .anyMatch(rule -> responseLine.contains(rule))
+                );
+    }
+
 }

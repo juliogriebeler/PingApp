@@ -2,16 +2,19 @@ package br.com.juliogriebeler.pingapp.dto;
 
 import br.com.juliogriebeler.pingapp.enumeration.ExecutionType;
 
+import java.io.Serializable;
+import java.net.InetAddress;
 import java.time.LocalDateTime;
 
-public class ExecutionArgument {
+
+public class ExecutionArgument implements Serializable {
 
     private ExecutionType executionType;
     private String command;
-    private String host;
+    private InetAddress host;
     private LocalDateTime startTime;
 
-    public ExecutionArgument(){
+    public ExecutionArgument() {
         this.startTime = LocalDateTime.now();
     }
 
@@ -31,11 +34,11 @@ public class ExecutionArgument {
         this.command = command;
     }
 
-    public String getHost() {
+    public InetAddress getHost() {
         return host;
     }
 
-    public void setHost(String host) {
+    public void setHost(InetAddress host) {
         this.host = host;
     }
 
